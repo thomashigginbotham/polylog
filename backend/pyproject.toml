@@ -1,0 +1,78 @@
+[tool.poetry]
+name = "polylog-backend"
+version = "1.0.0"
+description = "Polylog - Multi-user AI chat backend"
+authors = ["Polylog Team"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"  # Works with 3.11, 3.12, and 3.13
+fastapi = "^0.115.0"
+uvicorn = {extras = ["standard"], version = "^0.30.1"}
+motor = "^3.5.0"
+pymongo = "^4.8.0"
+redis = "^5.0.7"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+python-multipart = "^0.0.9"
+google-auth = "^2.32.0"
+google-auth-oauthlib = "^1.2.0"
+google-auth-httplib2 = "^0.2.0"
+google-cloud-aiplatform = "^1.60.0"
+pydantic = "^2.8.2"
+pydantic-settings = "^2.3.4"
+python-dotenv = "^1.0.1"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+email-validator = "^2.2.0"
+httpx = "^0.27.0"
+websockets = "^12.0"
+python-socketio = "^5.11.3"
+aiofiles = "^24.1.0"
+tenacity = "^8.5.0"
+structlog = "^24.2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+pytest-asyncio = "^0.23.7"
+pytest-cov = "^5.0.0"
+black = "^24.4.2"
+isort = "^5.13.2"
+flake8 = "^7.1.0"
+mypy = "^1.10.1"
+pre-commit = "^3.7.1"
+httpx = "^0.27.0"
+faker = "^26.0.0"
+factory-boy = "^3.3.0"
+mongomock-motor = "^0.0.33"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ['py312']
+include = '\.pyi?
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --strict-markers --asyncio-mode=auto"
+testpaths = ["tests"]
+pythonpath = ["."]
+
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --strict-markers --asyncio-mode=auto"
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -1,0 +1,25 @@
+# Frontend Development Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies for better compatibility
+RUN apk add --no-cache python3 make g++
+
+# Update npm to the latest version
+RUN npm install -g npm@latest
+
+# Copy package.json (don't copy lock file if it doesn't exist properly)
+COPY package.json ./
+
+# Install dependencies (will generate package-lock.json)
+RUN npm install
+
+# Copy the rest of the application
+COPY . .
+
+# Expose port
+EXPOSE 3000
+
+# Run development server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
