@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useWebSocket } from '../contexts/WebSocketContext';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ChatPage() {
   const { messages, sendMessage, connectionStatus, isConnected } = useWebSocket();
+  const { user, logout } = useAuth();
   const [newMessage, setNewMessage] = useState('');
 
   const handleSendMessage = () => {
@@ -38,6 +40,40 @@ export default function ChatPage() {
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Polylog</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">Many voices, one conversation</p>
         </div>
+        
+        {/* User Profile Section */}
+        {user && (
+          <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-3">
+              <img 
+                src={user.avatarUrl} 
+                alt={user.name}
+                className="w-10 h-10 rounded-full"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=3b82f6&color=fff&size=40`;
+                }}
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                  {user.name}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  {user.email}
+                </p>
+              </div>
+              <button
+                onClick={logout}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                title="Logout"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+        
         <div className="p-4">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Connection Status</h3>
           <div className={`text-sm font-medium ${getConnectionStatusColor()}`}>
@@ -47,7 +83,14 @@ export default function ChatPage() {
         <div className="p-4">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Online Users</h3>
           <div className="text-sm text-gray-600 dark:text-gray-300">
-            {isConnected ? '👤 You' : 'Waiting for connection...'}
+            {isConnected ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>{user?.name || 'You'}</span>
+              </div>
+            ) : (
+              'Waiting for connection...'
+            )}
           </div>
         </div>
       </div>
@@ -86,7 +129,7 @@ export default function ChatPage() {
               <div 
                 key={msg.id || index} 
                 className={`flex ${
-                  msg.userName === 'Test User' ? 'justify-end' : 'justify-start'
+                  msg.userName === user?.name ? 'justify-end' : 'justify-start'
                 } mb-4`}
               >
                 <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
@@ -94,7 +137,7 @@ export default function ChatPage() {
                     ? 'bg-gray-500 text-white' 
                     : msg.userName === 'AI Assistant'
                     ? 'bg-blue-500 text-white'
-                    : msg.userName === 'Test User'
+                    : msg.userName === user?.name
                     ? 'bg-green-500 text-white ml-auto'
                     : 'bg-purple-500 text-white'
                 }`}>
@@ -102,7 +145,7 @@ export default function ChatPage() {
                     <span className="text-sm font-medium">
                       {msg.userName === 'System' ? '⚙️' : 
                        msg.userName === 'AI Assistant' ? '🤖' : 
-                       msg.userName === 'Test User' ? '👤' : '💬'} {msg.userName}
+                       msg.userName === user?.name ? '👤' : '👥'} {msg.userName}
                     </span>
                     <span className="text-xs opacity-75">
                       {new Date(msg.timestamp).toLocaleTimeString()}

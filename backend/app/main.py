@@ -3,6 +3,7 @@ Polylog Backend Application
 Main FastAPI application entry point
 """
 
+from app.api.v1.endpoints.websocket import router as websocket_router
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 import logging
@@ -94,7 +95,6 @@ except Exception:
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 # Include WebSocket router at root level (not under API versioning)
-from app.api.v1.endpoints.websocket import router as websocket_router
 app.include_router(websocket_router, tags=["websocket"])
 
 
@@ -150,13 +150,13 @@ async def health_check():
 async def websocket_debug():
     """Debug endpoint to check WebSocket configuration"""
     from app.ws_manager import manager
-    
+
     return JSONResponse(
         content={
             "websocket_status": "available",
             "active_conversations": manager.get_all_conversations(),
             "total_connections": sum(
-                manager.get_connection_count(conv_id) 
+                manager.get_connection_count(conv_id)
                 for conv_id in manager.get_all_conversations()
             ),
             "cors_origins": settings.BACKEND_CORS_ORIGINS,
@@ -170,7 +170,7 @@ async def websocket_debug():
 async def websocket_test_page():
     """Simple WebSocket test page"""
     from fastapi.responses import HTMLResponse
-    
+
     html_content = """
     <!DOCTYPE html>
     <html>

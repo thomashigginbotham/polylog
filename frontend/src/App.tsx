@@ -28,21 +28,24 @@ const queryClient = new QueryClient({
 });
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
       </div>
     );
   }
 
-  if (!user) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  return <>{children}</>;
+  return <WebSocketProvider>{children}</WebSocketProvider>;
 };
 
 const router = createBrowserRouter([
@@ -73,32 +76,31 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <WebSocketProvider>
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-              <RouterProvider router={router} />
-              {/* Toast notifications */}
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            <RouterProvider router={router} />
+            
+            {/* Toast notifications */}
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#363636',
+                  color: '#fff',
+                },
+                success: {
                   style: {
-                    background: '#363636',
-                    color: '#fff',
+                    background: '#10b981',
                   },
-                  success: {
-                    style: {
-                      background: '#10b981',
-                    },
+                },
+                error: {
+                  style: {
+                    background: '#ef4444',
                   },
-                  error: {
-                    style: {
-                      background: '#ef4444',
-                    },
-                  },
-                }}
-              />
-            </div>
-          </WebSocketProvider>
+                },
+              }}
+            />
+          </div>
         </AuthProvider>
       </ThemeProvider>
       

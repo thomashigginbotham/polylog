@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
+import { useAuth } from './AuthContext';
 
 interface Message {
   id: string;
@@ -19,6 +20,7 @@ interface WebSocketContextType {
 const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
 
 export function WebSocketProvider({ children }: { children: ReactNode }) {
+  const { token, user, isAuthenticated } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected');
@@ -40,10 +42,16 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
     isConnecting.current = true;
 
     console.log('🔌 Attempting WebSocket connection with ID:', newConnectionId);
+    console.log('👤 User authenticated:', isAuthenticated ? user?.name : 'No');
     setConnectionStatus('connecting');
 
-    // Switch back to full WebSocket endpoint with AI responses
-    const ws = new WebSocket('ws://localhost:8000/ws/test');
+    // Build WebSocket URL with optional token parameter
+    let wsUrl = 'ws://localhost:8000/ws/test';
+    if (token) {
+      wsUrl += `?token=${encodeURIComponent(token)}`;
+    }
+
+    const ws = new WebSocket(wsUrl);
 
     ws.onopen = (event) => {
       // Check if this is still the active connection attempt
@@ -54,6 +62,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       }
 
       console.log('✅ WebSocket connected successfully with ID:', newConnectionId);
+      console.log('🔐 Authentication status:', isAuthenticated ? 'Authenticated' : 'Anonymous');
       setConnectionStatus('connected');
       setSocket(ws);
       isConnecting.current = false;
@@ -123,17 +132,23 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
 
     // Store reference for cleanup
     setSocket(ws);
-  }, []); // Empty dependency array to prevent recreations
+  }, [token, isAuthenticated, user]); // Dependencies include auth state
 
   useEffect(() => {
-    // Debounce connection attempt to prevent React Strict Mode duplicates
-    const timer = setTimeout(() => {
-      connectWebSocket();
-    }, 100);
+    // Only connect if we have authentication context loaded
+    if (isAuthenticated !== undefined) {
+      // Debounce connection attempt to prevent React Strict Mode duplicates
+      const timer = setTimeout(() => {
+        connectWebSocket();
+      }, 100);
 
+      return () => clearTimeout(timer);
+    }
+  }, [connectWebSocket, isAuthenticated]);
+
+  useEffect(() => {
     // Cleanup on component unmount
     return () => {
-      clearTimeout(timer);
       if (socket) {
         console.log('🧹 Cleaning up WebSocket connection');
         socket.close(1000, 'Component unmounting');
@@ -141,7 +156,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       isConnecting.current = false;
       connectionId.current = null;
     };
-  }, []); // Empty dependency array - only run once
+  }, []);
 
   const sendMessage = useCallback((message: string) => {
     if (!socket) {
