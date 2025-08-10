@@ -1,32 +1,37 @@
-# Backend Development Dockerfile
+# Development Dockerfile - install dependencies system-wide for volume mounts
 FROM python:3.12-slim
 
-# Set working directory
 WORKDIR /app
 
-# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    POETRY_HOME="/opt/poetry" \
+    PATH="/opt/poetry/bin:$PATH"
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     build-essential \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY requirements.txt .
+# Install Poetry
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
-# Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Copy only pyproject.toml first (ignore existing lock file)
+COPY pyproject.toml ./
 
-# Copy the rest of the application
-COPY . .
+# Configure poetry to not create virtual environment (install system-wide)
+RUN poetry config virtualenvs.create false
 
-# Expose port
+# Generate fresh lock file from pyproject.toml
+RUN poetry lock
+
+# Install dependencies system-wide
+RUN poetry install --no-root
+
 EXPOSE 8000
 
-# Run the application with reload for development
-CMD ["sh", "-c", "echo 'Starting backend...' && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]
+# Use poetry to run the app directly (no virtual environment needed)
+CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

@@ -4,7 +4,6 @@ MongoDB database connection and management using Motor
 
 from typing import Optional
 import logging
-import motor.motor_asyncio
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
 from app.core.config import settings
@@ -21,7 +20,6 @@ async def init_mongodb() -> None:
     Initialize MongoDB connection
     """
     global mongodb_client, mongodb
-    
     try:
         # Create Motor client
         mongodb_client = AsyncIOMotorClient(
@@ -32,22 +30,18 @@ async def init_mongodb() -> None:
             maxPoolSize=50,
             minPoolSize=10,
         )
-        
         # Test connection
         await mongodb_client.admin.command("ping")
         logger.info("Successfully connected to MongoDB")
-        
         # Get database
         mongodb = mongodb_client[settings.MONGODB_DB_NAME]
-        
         # Try to create indexes (but don't fail if it doesn't work)
         try:
             await create_indexes()
-        except Exception as e:
-            logger.warning(f"Could not create indexes: {e}")
-        
-    except Exception as e:
-        logger.error(f"Failed to connect to MongoDB: {e}")
+        except Exception:
+            logger.warning("Could not create indexes", exc_info=True)
+    except Exception:
+        logger.exception("Failed to connect to MongoDB")
         raise
 
 
@@ -55,8 +49,6 @@ async def close_mongodb() -> None:
     """
     Close MongoDB connection
     """
-    global mongodb_client
-    
     if mongodb_client:
         mongodb_client.close()
         logger.info("MongoDB connection closed")
@@ -66,23 +58,19 @@ async def create_indexes() -> None:
     """
     Create database indexes for optimal performance
     """
-    if not mongodb:
+    if mongodb is None:
         raise RuntimeError("MongoDB not initialized")
-    
     try:
         # For now, just create basic indexes
         # We'll add more indexes as we implement features
         logger.info("Creating database indexes...")
-        
         # Users collection indexes
         users_collection = mongodb[settings.USERS_COLLECTION]
         await users_collection.create_index("email", unique=True)
         await users_collection.create_index("googleId", unique=True)
-        
         logger.info("Database indexes created successfully")
-        
-    except Exception as e:
-        logger.error(f"Failed to create indexes: {e}")
+    except Exception:
+        logger.exception("Failed to create indexes")
         raise
 
 
@@ -90,7 +78,7 @@ async def get_database() -> AsyncIOMotorDatabase:
     """
     Get MongoDB database instance
     """
-    if not mongodb:
+    if mongodb is None:
         await init_mongodb()
     return mongodb
 
@@ -124,9 +112,8 @@ async def check_mongodb_health() -> bool:
     """
     Check MongoDB connection health
     """
-    if not mongodb_client:
+    if mongodb_client is None:
         return False
-    
     try:
         await mongodb_client.admin.command("ping")
         return True

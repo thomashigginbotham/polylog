@@ -39,18 +39,18 @@ Polylog is a web-based application that enables multiple users to engage in real
 
 #### Frontend
 
-- **Framework**: React 18 with TypeScript
+- **Framework**: React 19 with TypeScript
 - **Build Tool**: Vite
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS v4
 - **State Management**: Zustand
 - **Real-time**: Socket.io Client
 - **HTTP Client**: Axios
-- **Routing**: React Router v6
+- **Routing**: React Router v7
 
 #### Backend
 
 - **Framework**: FastAPI
-- **Language**: Python 3.11+
+- **Language**: Python 3.12+
 - **Database**: MongoDB with Motor (async driver)
 - **Cache**: Redis
 - **WebSocket**: Native FastAPI WebSocket support
@@ -256,6 +256,14 @@ pytest --cov=app  # With coverage
 cd frontend
 npm run test
 npm run test:coverage
+```
+
+### Linting
+
+To check the backend code for PEP 8 compliance, run the following command:
+
+```bash
+docker-compose exec backend poetry run flake8 .
 ```
 
 ## 📈 API Documentation
