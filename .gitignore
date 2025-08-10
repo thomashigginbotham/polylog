@@ -50,13 +50,14 @@ dist-ssr/
 *.local
 .npm
 
-# Environment variables
+# Environment variables and sensitive files
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 *.env
+google-credentials.json
 
 # IDE
 .vscode/

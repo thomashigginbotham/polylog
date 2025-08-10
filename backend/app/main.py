@@ -49,6 +49,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         logger.warning("Running without Redis")
     # Initialize WebSocket manager - using simple manager for now
     logger.info("WebSocket manager ready")
+    
+    # Initialize AI service
+    try:
+        from app.services.ai_service import ai_service
+        ai_initialized = await ai_service.initialize()
+        if ai_initialized:
+            logger.info("AI service initialized successfully")
+        else:
+            logger.info("AI service running in fallback mode")
+    except Exception as e:
+        logger.error("Failed to initialize AI service: %s", str(e))
+        logger.info("AI service will run in fallback mode")
     yield
     # Shutdown
     logger.info("Shutting down Polylog backend application")

@@ -19,6 +19,7 @@ class ConnectionManager:
     """
     Manages WebSocket connections for real-time communication
     """
+
     def __init__(self):
         # Active connections: {user_id: {socket_id: WebSocket}}
         self.active_connections: Dict[str, Dict[str, WebSocket]] = {}

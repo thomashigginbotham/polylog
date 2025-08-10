@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useWebSocket } from '../contexts/WebSocketContext';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -151,7 +152,34 @@ export default function ChatPage() {
                       {new Date(msg.timestamp).toLocaleTimeString()}
                     </span>
                   </div>
-                  <p className="text-sm">{msg.content}</p>
+                  <div className="text-sm">
+                    <ReactMarkdown
+                      components={{
+                        // Customize rendering to work well in chat bubbles
+                        p: ({ children }) => <div className="mb-2 last:mb-0">{children}</div>,
+                        strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+                        em: ({ children }) => <em className="italic">{children}</em>,
+                        code: ({ children }) => <code className="bg-black bg-opacity-20 px-1 py-0.5 rounded text-xs font-mono">{children}</code>,
+                        pre: ({ children }) => <pre className="bg-black bg-opacity-20 p-2 rounded mt-2 text-xs overflow-x-auto font-mono">{children}</pre>,
+                        ul: ({ children }) => <ul className="list-disc list-inside mt-2 space-y-1">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal list-inside mt-2 space-y-1">{children}</ol>,
+                        li: ({ children }) => <li className="ml-2">{children}</li>,
+                        blockquote: ({ children }) => <blockquote className="border-l-2 border-white border-opacity-30 pl-2 italic mt-2">{children}</blockquote>,
+                        h1: ({ children }) => <h1 className="text-base font-bold mt-2 mb-1">{children}</h1>,
+                        h2: ({ children }) => <h2 className="text-sm font-bold mt-2 mb-1">{children}</h2>,
+                        h3: ({ children }) => <h3 className="text-sm font-semibold mt-1 mb-1">{children}</h3>,
+                        a: ({ href, children }) => (
+                          <a href={href} target="_blank" rel="noopener noreferrer" className="underline hover:no-underline opacity-90 hover:opacity-100">
+                            {children}
+                          </a>
+                        ),
+                        // Handle line breaks properly
+                        br: () => <br />,
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               </div>
             ))

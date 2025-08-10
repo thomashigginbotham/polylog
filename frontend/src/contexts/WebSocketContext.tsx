@@ -43,6 +43,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
 
     console.log('🔌 Attempting WebSocket connection with ID:', newConnectionId);
     console.log('👤 User authenticated:', isAuthenticated ? user?.name : 'No');
+    console.log('🔑 Token available:', token ? 'Yes (' + token.substring(0, 20) + '...)' : 'No');
     setConnectionStatus('connecting');
 
     // Build WebSocket URL with optional token parameter

@@ -31,6 +31,9 @@ RUN poetry lock
 # Install dependencies system-wide
 RUN poetry install --no-root
 
+# Copy the Google Cloud credentials file if it exists
+COPY google-credentials.json* ./
+
 EXPOSE 8000
 
 # Use poetry to run the app directly (no virtual environment needed)

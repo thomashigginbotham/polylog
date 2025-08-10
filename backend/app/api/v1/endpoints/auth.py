@@ -4,16 +4,14 @@ Enhanced authentication endpoints with proper Google OAuth handling
 
 from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 import httpx
 from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
-from typing import Optional
 import logging
 
 from app.core.config import settings
 from app.db.mongodb import get_users_collection
-from app.models import User
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -45,8 +43,9 @@ async def create_access_token(user_data: dict) -> str:
         "sub": user_data["email"],
         "user_id": str(user_data["_id"]),
         "name": user_data["name"],
-        "exp": datetime.now(timezone.utc) + timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        "exp": (
+            datetime.now(timezone.utc)
+            + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         )
     }
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)

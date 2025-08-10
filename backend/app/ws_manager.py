@@ -27,7 +27,7 @@ class ConnectionManager:
         Raises:
             RuntimeError: If WebSocket connection fails
         """
-        try: 
+        try:
             await websocket.accept()
             if conversation_id not in self.active_connections:
                 self.active_connections[conversation_id] = []
